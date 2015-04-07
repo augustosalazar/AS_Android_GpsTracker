@@ -24,68 +24,102 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
     private LocationManager mLocationManager;
     private boolean mStayWithMap;
     private boolean mAutoMark;
+    private boolean mGpsStarted;
     private String bestProvider;
     private float mMapZoom = 17.0f;
+    private int mMinDistance = 10;
+    private int mMinTime = 0;
     private Criteria mCriteria;
+    static final String STATE_STAY = "mStayWithMap";
+    static final String STATE_MARK = "mAutoMark";
+    static final String STATE_GPS_STATE = "mGpsStarted";
+    private ToggleButton mButtonGps;
+    private ToggleButton mButtonStay;
+    private ToggleButton mButtonMark;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+
         mCriteria = new Criteria();
         mCriteria.setAccuracy(Criteria.ACCURACY_FINE);
         mCriteria.setPowerRequirement(Criteria.POWER_LOW);
 
-        setUpMapIfNeeded();
+        mButtonGps = (ToggleButton) findViewById(R.id.toggleButtonGps);
+        mButtonStay = (ToggleButton) findViewById(R.id.toggleButtonStay);
+        mButtonMark = (ToggleButton) findViewById(R.id.toggleButtonMark);
 
+        if (savedInstanceState != null) {
+            // Restore value of members from saved state
+            mStayWithMap = savedInstanceState.getBoolean(STATE_STAY);
+            mAutoMark = savedInstanceState.getBoolean(STATE_MARK);
+            mGpsStarted = savedInstanceState.getBoolean(STATE_GPS_STATE);
 
+        } else {
+            setUpMapIfNeeded();
 
-        mStayWithMap = true;
-        mAutoMark = true;
+            mStayWithMap = true;
+            mAutoMark = true;
+            mGpsStarted = false;
+        }
 
+        mLocationManager = (LocationManager) getSystemService(
+                Context.LOCATION_SERVICE);
 
+        mButtonGps.setChecked(mGpsStarted);
+        mButtonStay.setChecked(mStayWithMap);
+        mButtonMark.setChecked(mAutoMark);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putBoolean(STATE_STAY,mStayWithMap);
+        savedInstanceState.putBoolean(STATE_MARK, mAutoMark);
+        savedInstanceState.putBoolean(STATE_GPS_STATE, mGpsStarted);
+
+        super.onSaveInstanceState(savedInstanceState);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        setUpMapIfNeeded();
-
+        //setUpMapIfNeeded();
     }
 
 
     @Override
     protected void onPause() {
         super.onPause();
-        mLocationManager.removeUpdates(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mLocationManager.removeUpdates(this);
+        if (mLocationManager != null)
+             mLocationManager.removeUpdates(this);
     }
 
-    private void startGPS() {
+    private void getLastLocation() {
+
         mLocationManager = (LocationManager) getSystemService(
                 Context.LOCATION_SERVICE);
 
+        if (mCriteria  != null && mLocationManager != null ) {
+            bestProvider = mLocationManager.getBestProvider(mCriteria, false);
 
-        bestProvider = mLocationManager.getBestProvider(mCriteria, false);
+            Location location = mLocationManager.getLastKnownLocation(bestProvider);
 
-        Location location =  mLocationManager.getLastKnownLocation(bestProvider);
+            Toast.makeText(this, "bestProvider is " + bestProvider, Toast.LENGTH_SHORT).show();
 
-        Toast.makeText(this,"bestProvider is "+bestProvider,Toast.LENGTH_SHORT).show();
-
-        if (location != null) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
-        } else {
-            Toast.makeText(this,"LastKnownLocation is null",Toast.LENGTH_SHORT).show();
+            if (location != null) {
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
+            } else {
+                Toast.makeText(this, "LastKnownLocation is null", Toast.LENGTH_SHORT).show();
+            }
         }
-
-        //mLocationManager.requestLocationUpdates(bestProvider,
-        //        0, 1, this);
 
     }
 
@@ -93,17 +127,14 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
 
 
     private void setUpMapIfNeeded() {
-        // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
-            // Try to obtain the map from the SupportMapFragment.
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                     .getMap();
-            // Check if we were successful in obtaining the map.
             if (mMap != null) {
-
-                startGPS();
-
+                getLastLocation();
             }
+        } else {
+            getLastLocation();
         }
     }
 
@@ -138,8 +169,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
     }
 
     public void onClickButtonAutoMark(View view) {
-        boolean on = ((ToggleButton) view).isChecked();
-
         mAutoMark = !mAutoMark;
     }
 
@@ -148,15 +177,15 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
 
         if (on) {
 
+            mGpsStarted = true;
             bestProvider = mLocationManager.getBestProvider(mCriteria, false);
             Toast.makeText(this,"bestProvider is "+bestProvider,Toast.LENGTH_SHORT).show();
             mLocationManager.requestLocationUpdates(bestProvider,
-                    0, 10
+                    mMinTime, mMinDistance
                     , this);
-
-
         } else {
             mLocationManager.removeUpdates(this);
+            mGpsStarted = false;
         }
     }
 }
