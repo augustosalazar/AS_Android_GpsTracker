@@ -53,8 +53,8 @@
             android:layout_height="match_parent"
             android:onClick="onClickButtonAutoMark"
             android:checked="true"
-            android:textOn="Auto On"
-            android:textOff="Auto Off"/>
+            android:textOn="Mark On"
+            android:textOff="Mark Off"/>
 
 
     </LinearLayout>
