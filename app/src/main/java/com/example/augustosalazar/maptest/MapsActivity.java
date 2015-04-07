@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -24,7 +25,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
     private boolean mStayWithMap;
     private boolean mAutoMark;
     private String bestProvider;
-    private float mMapZoom;
+    private float mMapZoom = 17.0f;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +56,19 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
         mLocationManager = (LocationManager) getSystemService(
                 Context.LOCATION_SERVICE);
 
-        Location location =  mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        Criteria criteria = new Criteria();
+        bestProvider = mLocationManager.getBestProvider(criteria, false);
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
 
-        //Criteria criteria = new Criteria();
-        //bestProvider = mLocationManager.getBestProvider(criteria, false);
+        //Location location =  mLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        Location location =  mLocationManager.getLastKnownLocation(bestProvider);
+
+
+        if (location != null) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
+        } else {
+            Toast.makeText(this,"LastKnownLocation is null",Toast.LENGTH_SHORT).show();
+        }
 
         //mLocationManager.requestLocationUpdates(bestProvider,
         //        0, 1, this);
@@ -78,7 +86,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
-                mMap.animateCamera( CameraUpdateFactory.zoomTo( 17.0f ) );
+
                 startGPS();
 
             }
@@ -94,6 +102,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
         if (mStayWithMap)
             //mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
             mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+            mMap.animateCamera( CameraUpdateFactory.zoomTo( mMapZoom ) );
     }
 
     @Override
@@ -126,7 +135,9 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
 
         if (on) {
             mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                    0, 1, this);
+                    0, 10
+                    , this);
+
 
         } else {
             mLocationManager.removeUpdates(this);
