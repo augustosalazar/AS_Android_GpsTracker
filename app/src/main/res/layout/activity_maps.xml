@@ -35,7 +35,7 @@
             android:textOn="GPS on"
             android:textOff="GPS off"
             android:onClick="onClickButtonGPS"
-            android:id="@+id/toggleButton" />
+            android:id="@+id/toggleButtonGps" />
 
         <ToggleButton
             android:layout_width="0dp"
@@ -45,6 +45,7 @@
             android:textOn="Follow on"
             android:textOff="Follow off"
             android:checked="true"
+            android:id="@+id/toggleButtonStay"
             />
 
         <ToggleButton
@@ -54,7 +55,8 @@
             android:onClick="onClickButtonAutoMark"
             android:checked="true"
             android:textOn="Mark On"
-            android:textOff="Mark Off"/>
+            android:textOff="Mark Off"
+            android:id="@+id/toggleButtonMark"/>
 
 
     </LinearLayout>
