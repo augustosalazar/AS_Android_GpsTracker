@@ -76,7 +76,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
-        savedInstanceState.putBoolean(STATE_STAY,mStayWithMap);
+        savedInstanceState.putBoolean(STATE_STAY, mStayWithMap);
         savedInstanceState.putBoolean(STATE_MARK, mAutoMark);
         savedInstanceState.putBoolean(STATE_GPS_STATE, mGpsStarted);
 
@@ -86,7 +86,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
     @Override
     protected void onResume() {
         super.onResume();
-        //setUpMapIfNeeded();
     }
 
 
@@ -98,8 +97,10 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
     @Override
     protected void onStop() {
         super.onStop();
-        if (mLocationManager != null)
-             mLocationManager.removeUpdates(this);
+        Log.d(this.getClass().getSimpleName(), "onStop " + isFinishing());
+        if (this.isFinishing() == true)
+            if (mLocationManager != null)
+                mLocationManager.removeUpdates(this);
     }
 
     private void getLastLocation() {
@@ -107,7 +108,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
         mLocationManager = (LocationManager) getSystemService(
                 Context.LOCATION_SERVICE);
 
-        if (mCriteria  != null && mLocationManager != null ) {
+        if (mCriteria != null && mLocationManager != null) {
             bestProvider = mLocationManager.getBestProvider(mCriteria, false);
 
             Location location = mLocationManager.getLastKnownLocation(bestProvider);
@@ -122,8 +123,6 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
         }
 
     }
-
-
 
 
     private void setUpMapIfNeeded() {
@@ -146,7 +145,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
             mMap.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("Marker"));
         if (mStayWithMap)
             mMap.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-        mMap.animateCamera( CameraUpdateFactory.zoomTo( mMapZoom ) );
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(mMapZoom));
     }
 
     @Override
@@ -179,7 +178,7 @@ public class MapsActivity extends FragmentActivity implements LocationListener {
 
             mGpsStarted = true;
             bestProvider = mLocationManager.getBestProvider(mCriteria, false);
-            Toast.makeText(this,"bestProvider is "+bestProvider,Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "bestProvider is " + bestProvider, Toast.LENGTH_SHORT).show();
             mLocationManager.requestLocationUpdates(bestProvider,
                     mMinTime, mMinDistance
                     , this);

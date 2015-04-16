@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AS_Android_GpsTracker.iml" filepath="$PROJECT_DIR$/AS_Android_GpsTracker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MapTest.iml" filepath="$PROJECT_DIR$/MapTest.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
